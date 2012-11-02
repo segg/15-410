@@ -45,33 +45,33 @@ char* type_name(int type) {
  *  @return Void.
  */
 void format_string(char* addr, char* buf) {
-	memset(buf, '\0', BUFFER_SIZE);
-	/* Check if memory in [addr, addr + 25] is valid */
-	int ret = mprotect(
-			(void*)((int)addr & 0xfffff000),
-			((int)addr & 0x00000fff) + STRING_MAX_LENGTH + 1,
-			PROT_WRITE|PROT_READ|PROT_EXEC);
-	if (ret != 0) {
-		snprintf(buf, BUFFER_SIZE, "%p", addr);
-		return;
-	}
+  memset(buf, '\0', BUFFER_SIZE);
+  /* Check if memory in [addr, addr + 25] is valid */
+  int ret = mprotect(
+      (void*)((int)addr & 0xfffff000),
+      ((int)addr & 0x00000fff) + STRING_MAX_LENGTH + 1,
+      PROT_WRITE|PROT_READ|PROT_EXEC);
+  if (ret != 0) {
+    snprintf(buf, BUFFER_SIZE, "%p", addr);
+    return;
+  }
 
-	int len = strlen(addr);
-	int i;
-	for (i = 0; i < len && i < STRING_MAX_LENGTH; ++i) {
-		if (!isprint(*(addr + i))) {
-			snprintf(buf, BUFFER_SIZE, "%p", addr);
-			return;
-		}
-	}
-	if (len > STRING_MAX_LENGTH) {
-		strcat(buf, "\"");
-		strncpy(buf + 1, addr, STRING_MAX_LENGTH);
-		buf[STRING_MAX_LENGTH + 1] = '\0';
-		strcat(buf, "...\"");
-	} else {
-		snprintf(buf, BUFFER_SIZE, "\"%s\"", addr);
-	}
+  int len = strlen(addr);
+  int i;
+  for (i = 0; i < len && i < STRING_MAX_LENGTH; ++i) {
+    if (!isprint(*(addr + i))) {
+      snprintf(buf, BUFFER_SIZE, "%p", addr);
+      return;
+    }
+  }
+  if (len > STRING_MAX_LENGTH) {
+    strcat(buf, "\"");
+    strncpy(buf + 1, addr, STRING_MAX_LENGTH);
+    buf[STRING_MAX_LENGTH + 1] = '\0';
+    strcat(buf, "...\"");
+  } else {
+    snprintf(buf, BUFFER_SIZE, "\"%s\"", addr);
+  }
 }
 
 /** @brief Formats string array and stores in buf.
@@ -83,11 +83,11 @@ void format_string_array(char** addr, char* buf) {
   strcat(buf, "{");
   int i;
   for (i = 0; i < STRING_ARRAY_MEMBER_MAX_NUM; ++i) {
-		if (*addr == NULL) {
-			break;
-		}
-		char string_buf[BUFFER_SIZE];
-		format_string(*addr, string_buf);
+    if (*addr == NULL) {
+      break;
+    }
+    char string_buf[BUFFER_SIZE];
+    format_string(*addr, string_buf);
     strcat(buf, string_buf);
     ++addr;
     if (*addr != NULL && i < STRING_ARRAY_MEMBER_MAX_NUM - 1) {
@@ -110,11 +110,11 @@ void get_value_string(int type, void* addr, char* buf) {
   memset(buf, '\0', BUFFER_SIZE);
   switch (type) {
     case TYPE_CHAR:
-			if (isprint(*((char*)addr))) {
-      	snprintf(buf, BUFFER_SIZE, "'%c'", *((char*)addr));
-			} else {
-				snprintf(buf, BUFFER_SIZE, "'\\%d'", *((char*)addr));
-			}
+      if (isprint(*((char*)addr))) {
+        snprintf(buf, BUFFER_SIZE, "'%c'", *((char*)addr));
+      } else {
+        snprintf(buf, BUFFER_SIZE, "'\\%d'", *((char*)addr));
+      }
       return;
     case TYPE_INT:
       snprintf(buf, BUFFER_SIZE, "%d", *((int*)addr));
@@ -126,16 +126,16 @@ void get_value_string(int type, void* addr, char* buf) {
       snprintf(buf, BUFFER_SIZE, "%f", *((double*)addr));
       return;
     case TYPE_STRING:
-			format_string((char*)(*(int*)addr), buf);
+      format_string((char*)(*(int*)addr), buf);
       return;
     case TYPE_STRING_ARRAY:
       format_string_array((char**)(*(int*)addr), buf);
       return;
     case TYPE_VOIDSTAR:
-			snprintf(buf, BUFFER_SIZE, "0v%x", (unsigned int)addr);
+      snprintf(buf, BUFFER_SIZE, "0v%x", (unsigned int)addr);
       return;
-		default:
-			snprintf(buf, BUFFER_SIZE, "%p", addr);
+    default:
+      snprintf(buf, BUFFER_SIZE, "%p", addr);
   }
 }
 
@@ -146,7 +146,7 @@ void get_value_string(int type, void* addr, char* buf) {
  *  @return Void.
  */
 void get_arg_string(const argsym_t *arg, void* ebp, char* buf) {
-	memset(buf, '\0', BUFFER_SIZE);
+  memset(buf, '\0', BUFFER_SIZE);
   snprintf(buf, BUFFER_SIZE, "%s%s=", type_name(arg->type), arg->name);
   char value_string[BUFFER_SIZE];
   get_value_string(arg->type, arg->offset + ebp, value_string);
@@ -157,7 +157,7 @@ void get_arg_string(const argsym_t *arg, void* ebp, char* buf) {
 void get_function_string(const functsym_t* function, void* ebp, char* buf) {
   memset(buf, '\0', BUFFER_SIZE);
   snprintf(buf, BUFFER_SIZE, "Function %s(", function->name);
-	/* Print argument list */
+  /* Print argument list */
   int i;
   for (i = 0; i < ARGS_MAX_NUM; ++i) {
     const argsym_t *arg = &function->args[i];

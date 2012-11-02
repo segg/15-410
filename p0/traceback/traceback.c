@@ -67,7 +67,7 @@ void traceback(FILE *fp) {
       get_function_string(&functions[index], ebp, function_string);
       fputs(function_string, fp);
     } else {
-			fprintf(fp, "Function %p(...), in\n", addr);
-		}
+      fprintf(fp, "Function %p(...), in\n", addr);
+    }
   } while (1);
 }
